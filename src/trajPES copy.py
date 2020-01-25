@@ -40,8 +40,7 @@ import pandas as pd
 from copy import deepcopy
 import plotly.graph_objects as go 
 import plotly.offline as py
-# import plotly.express as px
-# from xyz2graph import MolGraph, to_plotly_figure
+from xyz2graph import MolGraph, to_plotly_figure
 # from ipywidgets import interactive, HBox, VBox
 # from IPython.display import display
 
@@ -55,13 +54,25 @@ import plotly.offline as py
 # from plotly.subplots import make_subplots
 # import plotly.offline as py
 # import plotly.io as pio
-from plotly.offline import offline, iplot
+# from plotly.offline import offline, iplot
 
-# import matplotlib.animation as animation
+import matplotlib.animation as animation
 
 # workDir = os.getcwd()
 # PATH_fig = workDir
 
+# title = ''
+# xaxis = 'Modified IRC of TSS1'
+# yaxis = 'IRC of TSS2'
+# zaxis = 'kcal/mol'
+# axis_fontsize = 6
+
+# static figure objects
+# fig = plt.figure()
+# threeD = fig.add_subplot(1, 2, 2,projection='3d') # top and bottom right 
+# mol = fig.add_subplot(2,2,1)
+# mol.axis('off') # remove borders, ticks and labels
+# twoD = fig.add_subplot(2, 2, 3)  # bottom left
 
 # interact objects
 # fig = make_subplots(rows = 2, cols = 2)
@@ -77,9 +88,7 @@ def main():
     # 2. Plot the background: 2D-PES and 3D-PES
     twoD = twoDwPts(X, Y, E, Pts)
     threeD = threeDwPts(X, Y, E, Pts)
-    # mol = molGeo(sys.argv[4])
-    threeD.show()
-
+    mol = molGeo(sys.argv[4])
     
     # 3. Combine above  FIXME:
     # fig = ani(twoD,threeD,traj)
@@ -91,7 +100,7 @@ def main():
     # display(fig)
     # display(fig)
     # outines and export them into one video
-    # frames = ani(twoD,threeD,traj)
+    frames = ani(twoD,threeD,traj)
     # print('test')
     # fig.add_trace(threeD,row=1,col=2)
     # fig.add_trace(twoD,row=2,col=1)
@@ -162,29 +171,16 @@ def twoDwPts( X, Y, E, Pts):
     return twoD
     
 def threeDwPts(X, Y, E, Pts):
-    # selected range of relative energy
-    minE=-20
-    maxE=120
-
-    #  make surface
     pes = go.Surface(
         x=X, y=Y, z=E,
-        opacity=0.9,
-        cmin=minE,cmax=maxE
+        opacity=0.7
     ) 
 
-    lines = [] #FIXME:https://plot.ly/python/v3/3d-wireframe-plots/
-    line_marker = dict(color='#0066FF', width=2)
-    for i, j, k in zip(X, Y, E):
-        lines.append(go.Scatter3d(x=i, y=j, z=k, mode='lines', line=line_marker))
-
-    # important points
     pts = go.Scatter3d(
         x=Pts[1], y=Pts[2], z=Pts[3],
         text=Pts[0],
-        textposition="top center",
-        mode='markers + text',
-        textfont_size=14,
+        textposition="bottom center",
+        mode='markers+text',
         marker_line_width=2,
         marker_size=10,
         marker_color='rgba(37,116,169,1)' #jelly blue
@@ -193,21 +189,10 @@ def threeDwPts(X, Y, E, Pts):
     layout = go.Layout(
         showlegend = False,
         scene = dict(
-            xaxis = dict(
-                title = 'Modified IRC of TSS1'
-            ),
-            yaxis = dict(
-                title = 'IRC of TSS2'
-            ),
             zaxis = dict(
-                title = 'kcal/mol',
-                range=[minE,maxE]
+                range=[-20,120]
             )
-        ),
-        font = dict(
-            size=14
-        )  
-
+        )
     )
 
     threeD = go.FigureWidget( data=[pes,pts] , layout=layout)
